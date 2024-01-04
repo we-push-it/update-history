@@ -9,7 +9,7 @@ end_date=$(date -d "-$days days" +"%Y-%m-%d")
 echo "YUM-Updates seit $end_date:"
 
 # Die Yum-Historie auslesen und Zeilen bearbeiten
-yum history | while IFS='|' read -r id_line; do
+yum history 2> /dev/null | while IFS='|' read -r id_line; do
     # Extrahiere ID und Datum aus der Zeile
     id=$(echo "$id_line" | awk '{print $1}')
     trans_date=$(echo "$id_line" | awk -F '|' '{print $3}' | awk '{print $1}')
@@ -19,7 +19,7 @@ yum history | while IFS='|' read -r id_line; do
         # Prüfe, ob das Datum der Transaktion größer als oder gleich dem Enddatum ist
         if [[ $trans_date > $end_date || $trans_date == $end_date ]]; then
             # Extrahiere und formatiere die Informationen der Transaktion
-            yum history info "$id" | awk -v trans_date="$trans_date" '
+            yum history info "$id"  2> /dev/null | awk -v trans_date="$trans_date" '
             /Packages Altered:/ {print_flag=1; next}
             /Transaction performed with:/ {print_flag=0}
             print_flag && !/^$/ {
